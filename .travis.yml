@@ -1,0 +1,26 @@
+language: c
+compiler: gcc
+
+os: linux
+dist: bionic
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-10
+
+script:
+  - export CC=gcc-10
+  - export CXX=g++-10
+  - cmake .
+  - make
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "oqSQaWQtOapMZ0yBD3N4W0dmL4JxjC2eb/3CkhKo/BygKbEjZSvkXa6JkV3x6Jsn00r+dRLKku/iOY+vuRU2TAh3T4hKyMROE2klH8ZDvhJQqykFLXcWaph8YV3ONa47vXlR7zRGaYFzOA6S0p/+5kYD0lZVkWyXFEDJdhrbyOocsgjXaz6YaYsalseepFV2OXFg/GGtNgJyVPktGTBfk7L2REG7oldveTC+WOynbWN3U8zkzcQZkuwI64NCpbjO5Mm1//QdTVaI0SdXk1VpYOMI5+pfJ/nJlIGp6OQnTze1EQI7XgG7MGQy68tTwr5zPbSK0lBhED8DPRSFoMM2JUJgKr86ROVx+22Bel+naqRLXfLfYI4pOwgvVKRZ/uqIPoYAGleK4u15Q31gVPP68R/uzPvJyI689Fj6ei4gQbRMCVMfEn6XCflzrcBVWl1hs2RPxreWlnEwXUnyV/vnLTDvLSeI5Qh4uJCTVx7FMaq3QpQpb4vFjpJ8cQc2R31edXFk3rffAHzd1kOducqhMqUT2+jEdB12ju/6xR5mFuOm7y84UKi7aTjA+QKV457kSD0pkWJHFSELp9es2jNLNY//eFzBRswhk2YtBRhZL/v/vmtZscZPVwb+ItjrUF9B0UEUf/ZpkI219m9+a+Z08+4gZdn07MecUgT6vAW+xJ8="
+  file: "idRehash"
+  skip_cleanup: true
+  on:
+    tags: true
