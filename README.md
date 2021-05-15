@@ -1,4 +1,6 @@
 # idRehashLinux
+[![Build Status](https://www.travis-ci.com/PowerBall253/idRehashLinux.svg?branch=main)](https://www.travis-ci.com/PowerBall253/idRehashLinux)
+
 DOOM Eternal .resources rehasher, rewritten in C for Linux.
 
 ## Usage
