@@ -120,7 +120,7 @@ GArray *get_resource_paths(char *filepath)
             extension = filename;
         }
 
-        if (!strcmp(extension, ".resources") && strcmp(filename, "meta.resources") && strcmp(filename, "tutorial_demons.resources")) {
+        if (!strcmp(extension, ".resources") && strcmp(filename, "meta.resources")) {
             char *resource_path = strdup(p->fts_path);
             g_array_append_val(resource_files, resource_path);
         }
@@ -137,7 +137,7 @@ int get_resource_hash_offset(char *path, unsigned char *dec_container_mask_data,
 
     if (!hash_resource_headers(path, &hash)) {
         fprintf(stderr, "ERROR: Failed to get hash for %s!\n", path);
-        return -1;
+        return 0;
     }
 
     unsigned char hash_bytes[sizeof(hash)];
@@ -162,7 +162,7 @@ int get_resource_hash_offset(char *path, unsigned char *dec_container_mask_data,
 
     if (hash_offset == 0) {
         fprintf(stderr, "ERROR: Failed to get offset for %s!\n", path);
-        return -1;
+        return 0;
     }
 
     return hash_offset;
