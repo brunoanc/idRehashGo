@@ -6,6 +6,7 @@ set(CMAKE_C_STANDARD 99)
 file(GLOB SOURCES
         ./main.c
         ./farmhash-c/farmhash.c
+        ./farmhash-c/farmhash.h
         )
 
 find_package(PkgConfig REQUIRED)
