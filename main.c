@@ -34,10 +34,10 @@ typedef int OodLZ_DecompressFunc(uint8_t *src_buf, int src_len, uint8_t *dst, si
 
 struct resource_map_entry {
     char *resource_path;
-    long offset;
+    size_t offset;
 };
 
-bool hash_resource_headers(char *path, uint64_t *hash)
+bool hash_resource_headers(const char *path, uint64_t *hash)
 {
     FILE *f = fopen(path, "rb");
 
@@ -58,7 +58,7 @@ bool hash_resource_headers(char *path, uint64_t *hash)
 
     end_addr += 4;
 
-    uint64_t headers_size = end_addr - start_addr;
+    size_t headers_size = end_addr - start_addr;
 
     char *hashed_data = malloc(headers_size);
     fseek(f, start_addr, SEEK_SET);
@@ -131,7 +131,7 @@ GArray *get_resource_paths(char *filepath)
     return resource_files;
 }
 
-int get_resource_hash_offset(char *path, unsigned char *dec_container_mask_data, int dec_size)
+size_t get_resource_hash_offset(const char *path, unsigned char *dec_container_mask_data, const size_t dec_size)
 {
     uint64_t hash = 0;
 
@@ -143,10 +143,10 @@ int get_resource_hash_offset(char *path, unsigned char *dec_container_mask_data,
     unsigned char hash_bytes[sizeof(hash)];
     memcpy(hash_bytes, &hash, sizeof(hash));
 
-    int hash_offset = 0;
+    size_t hash_offset = 0;
     int current_hash_byte = 0;
 
-    for (int i = dec_size - 1; i >= 0; i--) {
+    for (size_t i = dec_size - 1; i >= 0; i--) {
         if (dec_container_mask_data[i] != hash_bytes[7 - current_hash_byte]) {
             current_hash_byte = 0;
             continue;
@@ -168,7 +168,7 @@ int get_resource_hash_offset(char *path, unsigned char *dec_container_mask_data,
     return hash_offset;
 }
 
-bool generate_map(unsigned char *dec_data, uint64_t size)
+bool generate_map(unsigned char *dec_data, const size_t size)
 {
     FILE *hash_offset_map = fopen("idRehash.map", "w");
 
@@ -179,15 +179,15 @@ bool generate_map(unsigned char *dec_data, uint64_t size)
 
     GArray *resources_path_array = get_resource_paths(".");
 
-    for (int i = 0; i < resources_path_array->len; i++) {
+    for (size_t i = 0; i < resources_path_array->len; i++) {
         char *resource_path = g_array_index(resources_path_array, char*, i);
 
-        int hash_offset = get_resource_hash_offset(resource_path, dec_data, size);
+        size_t hash_offset = get_resource_hash_offset(resource_path, dec_data, size);
 
         if (hash_offset == 0)
             return false;
         
-        fprintf(hash_offset_map, "%s;%d\n", resource_path, hash_offset);
+        fprintf(hash_offset_map, "%s;%lu\n", resource_path, hash_offset);
     }
 
     g_array_free(resources_path_array, true);
@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 
     fclose(meta);
 
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--getoffsets"))
             return generate_map(dec_data, size) ? 0 : 1;
 
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
         if (*hash_str == '\n' || *hash_str == '\0')
             continue;
 
-        long offset = strtol(hash_str, &end, 10);
+        size_t offset = strtoul(hash_str, &end, 10);
 
         if (end == hash_str || errno == ERANGE) {
             fprintf(stderr, "ERROR: Failed to read hash from idRehash.map!\n");
@@ -325,10 +325,10 @@ int main(int argc, char **argv)
 
     int fixed_hashes = 0;
 
-    for (int i = 0; i < resource_offsets->len; i++) {
+    for (size_t i = 0; i < resource_offsets->len; i++) {
         struct resource_map_entry resource = g_array_index(resource_offsets, struct resource_map_entry, i);
 
-        long offset = resource.offset;
+        size_t offset = resource.offset;
         uint64_t hash = 0;
 
         if (hash_resource_headers(resource.resource_path, &hash)) {
