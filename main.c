@@ -113,15 +113,13 @@ GArray *get_resource_paths(char *filepath)
 
         char *filename = strrchr(p->fts_path, '/') + 1;
 
-        if (!filename) {
+        if (!filename)
             filename = p->fts_path;
-        }
         
         char *extension = strrchr(p->fts_path, '.');
 
-        if (!extension) {
+        if (!extension)
             extension = filename;
-        }
 
         if (!strcmp(extension, ".resources") && strcmp(filename, "meta.resources")) {
             char *resource_path = strdup(p->fts_path);
