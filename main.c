@@ -28,6 +28,7 @@
 
 #include "farmhash-c/farmhash.h"
 
+// Oodle decompression func
 typedef int OodLZ_DecompressFunc(uint8_t *src_buf, int src_len, uint8_t *dst, size_t dst_size,
     int fuzz, int crc, int verbose,
     uint8_t *dst_base, size_t e, void *cb, void *cb_ctx, void *scratch, size_t scratch_size, int threadPhase);
@@ -37,6 +38,7 @@ struct resource_map_entry {
     size_t offset;
 };
 
+// Hashes the resource headers with farmhash64
 bool hash_resource_headers(const char *path, uint64_t *hash)
 {
     FILE *f = fopen(path, "rb");
@@ -78,6 +80,7 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
     return true;
 }
 
+// Gets all the resource file paths
 GArray *get_resource_paths(char *filepath)
 {
     char **filepath_array;
@@ -131,6 +134,7 @@ GArray *get_resource_paths(char *filepath)
     return resource_files;
 }
 
+// Gets the offset for the hashes in the given resource
 size_t get_resource_hash_offset(const char *path, unsigned char *dec_container_mask_data, const size_t dec_size)
 {
     uint64_t hash = 0;
@@ -168,6 +172,7 @@ size_t get_resource_hash_offset(const char *path, unsigned char *dec_container_m
     return hash_offset;
 }
 
+// Generates the map with the resource filenames and their hash offset
 bool generate_map(unsigned char *dec_data, const size_t size)
 {
     FILE *hash_offset_map = fopen("idRehash.map", "w");
@@ -202,6 +207,7 @@ int main(int argc, char **argv)
 {   
     printf("idRehashLinux v1.0 by PowerBall253 :)\n\n");
 
+    // Read and decompress data from meta.resources
     FILE *meta = fopen("meta.resources", "rb");
 
     if (!meta) {
@@ -272,6 +278,7 @@ int main(int argc, char **argv)
 
     fclose(meta);
 
+    // Check program arguments & generate map if needed
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--getoffsets"))
             return generate_map(dec_data, size) ? 0 : 1;
@@ -282,6 +289,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Read from previously generated hash map
     FILE *hash_offset_map = fopen("idRehash.map", "rb");
 
     if (!hash_offset_map) {
@@ -323,6 +331,7 @@ int main(int argc, char **argv)
 
     fclose(hash_offset_map);
 
+    // Hash resource headers and change the hash in the decompressed meta.resources data
     int fixed_hashes = 0;
 
     for (size_t i = 0; i < resource_offsets->len; i++) {
@@ -360,6 +369,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
+    // Write the new decompressed data to meta.resources
     meta = fopen("meta.resources", "rb+");
 
     if (!meta) {
