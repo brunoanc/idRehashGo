@@ -93,7 +93,7 @@ GArray *get_resource_paths(char *filepath)
     ftsp = fts_open(filepath_array, FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR, NULL);
     free(filepath_array);
 
-    resource_files = g_array_sized_new(false, false, sizeof(char*), 80);
+    resource_files = g_array_sized_new(false, false, sizeof(char*), 100);
 
     if (!ftsp) {
         fprintf(stderr, "ERROR: Failed to open %s directory!\n", filepath);
@@ -296,7 +296,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    GArray *resource_offsets = g_array_sized_new(false, false, sizeof(struct resource_map_entry), 80);
+    GArray *resource_offsets = g_array_sized_new(false, false, sizeof(struct resource_map_entry), 100);
     char buffer[1024];
 
     while(fgets(buffer, sizeof(buffer), hash_offset_map) != NULL) {
