@@ -73,7 +73,7 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
     fclose(f);
 
     *hash = farmhash64(hashed_data, headers_size);
-    printf("%s: %llx\n", path, *hash);
+    printf("%s: %lx\n", path, *hash);
 
     free(hashed_data);
     return true;
@@ -216,7 +216,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    fseek(meta, (long)(0x38 + info_offset), SEEK_SET);
+    fseek(meta, 0x38 + (long)info_offset, SEEK_SET);
     uint64_t file_offset;
 
     if (fread(&file_offset, 8, 1, meta) != 1) {
@@ -349,7 +349,7 @@ int main(int argc, char **argv)
                         dec_data[offset + i] = phash[i];
 
                     fixed_hashes++;
-                    printf("  ^ Updated from %llx\n\n", old_hash);
+                    printf("  ^ Updated from %lx\n\n", old_hash);
                 }
             }
         }
@@ -370,7 +370,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    fseek(meta, (long)(0x38 + info_offset + 0x8), SEEK_SET);
+    fseek(meta, 0x38 + (long)info_offset + 0x8, SEEK_SET);
 
     if (fwrite(&size, 1, 4, meta) != 4) {
         fprintf(stderr, "ERROR: Failed to write to meta.resources.\n");
