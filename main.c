@@ -44,7 +44,7 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
     FILE *f = fopen(path, "rb");
 
     if (!f) {
-        fprintf(stderr, "ERROR: Failed to open %s for reading!\n", path);
+        fprintf(stderr, "ERROR: Failed to open %s for reading.\n", path);
         return false;
     }
 
@@ -54,7 +54,7 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
     uint64_t end_addr = 0;
 
     if (fread(&end_addr, 8, 1, f) != 1) {
-        fprintf(stderr, "ERROR: Failed to read from %s!\n", path);
+        fprintf(stderr, "ERROR: Failed to read from %s.\n", path);
         return false;
     }
 
@@ -63,47 +63,43 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
     size_t headers_size = end_addr - start_addr;
 
     char *hashed_data = malloc(headers_size);
-    fseek(f, start_addr, SEEK_SET);
+    fseek(f, (long)start_addr, SEEK_SET);
 
     if (fread(hashed_data, 1, headers_size, f) != headers_size) {
-        fprintf(stderr, "ERROR: Failed to read from %s!\n", path);
+        fprintf(stderr, "ERROR: Failed to read from %s.\n", path);
         return false;
     }
 
     fclose(f);
 
     *hash = farmhash64(hashed_data, headers_size);
-    printf("%s: %lx\n", path, *hash);
+    printf("%s: %llx\n", path, *hash);
 
     free(hashed_data);
-
     return true;
 }
 
 // Gets all the resource file paths
 GArray *get_resource_paths(char *filepath)
 {
-    char **filepath_array;
+    char *filepath_array[1];
     GArray *resource_files;
     FTS *ftsp;
     FTSENT *p, *chp;
 
-    filepath_array = malloc(sizeof(char**));
     filepath_array[0] = filepath;
     ftsp = fts_open(filepath_array, FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR, NULL);
-    free(filepath_array);
-
     resource_files = g_array_sized_new(false, false, sizeof(char*), 100);
 
     if (!ftsp) {
-        fprintf(stderr, "ERROR: Failed to open %s directory!\n", filepath);
+        fprintf(stderr, "ERROR: Failed to open %s directory.\n", filepath);
         return NULL;
     }
 
     chp = fts_children(ftsp, 0);
 
     if (!chp) {
-        fprintf(stderr, "ERROR: Failed to open %s directory!\n", filepath);
+        fprintf(stderr, "ERROR: Failed to open %s directory.\n", filepath);
         return NULL;
     }
 
@@ -121,24 +117,23 @@ GArray *get_resource_paths(char *filepath)
         if (!extension)
             extension = filename;
 
-        if (!strcmp(extension, ".resources") && strcmp(filename, "meta.resources")) {
+        if (strcmp(extension, ".resources") == 0 && strcmp(filename, "meta.resources") != 0) {
             char *resource_path = strdup(p->fts_path);
             g_array_append_val(resource_files, resource_path);
         }
     }
 
     fts_close(ftsp);
-
     return resource_files;
 }
 
 // Gets the offset for the hashes in the given resource
-size_t get_resource_hash_offset(const char *path, unsigned char *dec_container_mask_data, const size_t dec_size)
+size_t get_resource_hash_offset(const char *path, const unsigned char *dec_container_mask_data, const size_t dec_size)
 {
     uint64_t hash = 0;
 
     if (!hash_resource_headers(path, &hash)) {
-        fprintf(stderr, "ERROR: Failed to get hash for %s!\n", path);
+        fprintf(stderr, "ERROR: Failed to get hash for %s.\n", path);
         return 0;
     }
 
@@ -163,7 +158,7 @@ size_t get_resource_hash_offset(const char *path, unsigned char *dec_container_m
     }
 
     if (hash_offset == 0) {
-        fprintf(stderr, "ERROR: Failed to get offset for %s!\n", path);
+        fprintf(stderr, "ERROR: Failed to get offset for %s.\n", path);
         return 0;
     }
 
@@ -176,7 +171,7 @@ bool generate_map(unsigned char *dec_data, const size_t size)
     FILE *hash_offset_map = fopen("idRehash.map", "w");
 
     if (!hash_offset_map) {
-        fprintf(stderr, "ERROR: Failed to open idRehash.map for writing!\n");
+        fprintf(stderr, "ERROR: Failed to open idRehash.map for writing.\n");
         return false;
     }
 
@@ -184,20 +179,20 @@ bool generate_map(unsigned char *dec_data, const size_t size)
 
     for (size_t i = 0; i < resources_path_array->len; i++) {
         char *resource_path = g_array_index(resources_path_array, char*, i);
-
         size_t hash_offset = get_resource_hash_offset(resource_path, dec_data, size);
 
-        if (hash_offset == 0)
+        if (hash_offset == 0) {
+            fprintf(stderr, "ERROR: Failed to get hash for %s.\n", resource_path);
             return false;
+        }
         
         fprintf(hash_offset_map, "%s;%lu\n", resource_path, hash_offset);
     }
 
     g_array_free(resources_path_array, true);
-
     fclose(hash_offset_map);
 
-    printf("\nidRehash.map has been successfully generated!\n");
+    printf("\nidRehash.map has been successfully generated.\n");
     return true;
 }
 
@@ -209,7 +204,7 @@ int main(int argc, char **argv)
     FILE *meta = fopen("meta.resources", "rb");
 
     if (!meta) {
-        fprintf(stderr, "ERROR: Failed to open meta.resources for reading!\n");
+        fprintf(stderr, "ERROR: Failed to open meta.resources for reading.\n");
         return 1;
     }
 
@@ -217,36 +212,36 @@ int main(int argc, char **argv)
     uint64_t info_offset;
 
     if (fread(&info_offset, 8, 1, meta) != 1) {
-        fprintf(stderr, "ERROR: Failed to read from meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to read from meta.resources.\n");
         return 1;
     }
 
-    fseek(meta, 0x38 + info_offset, SEEK_SET);
+    fseek(meta, (long)(0x38 + info_offset), SEEK_SET);
     uint64_t file_offset;
 
     if (fread(&file_offset, 8, 1, meta) != 1) {
-        fprintf(stderr, "ERROR: Failed to read from meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to read from meta.resources.\n");
         return 1;
     }
 
     uint64_t size_z;
 
     if (fread(&size_z, 8, 1, meta) != 1) {
-        fprintf(stderr, "ERROR: Failed to read from meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to read from meta.resources.\n");
         return 1;
     }
 
     uint64_t size;
 
     if (fread(&size, 8, 1, meta) != 1) {
-        fprintf(stderr, "ERROR: Failed to read from meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to read from meta.resources.\n");
         return 1;
     }
     
     unsigned char *dec_data = malloc(size);
 
     if (size == size_z) {
-        fseek(meta, file_offset, SEEK_SET);
+        fseek(meta, (long)file_offset, SEEK_SET);
 
         if (fread(dec_data, 1, size, meta) != size) {
             fprintf(stderr, "ERROR: Failed to read from meta.resources - bad file?\n");
@@ -256,7 +251,7 @@ int main(int argc, char **argv)
     else {
         unsigned char *comp_data = malloc(size_z);
 
-        fseek(meta, file_offset, SEEK_SET);
+        fseek(meta, (long)file_offset, SEEK_SET);
 
         if (fread(comp_data, 1, size_z, meta) != size_z) {
             fprintf(stderr, "ERROR: Failed to read from meta.resources - bad file?\n");
@@ -266,7 +261,7 @@ int main(int argc, char **argv)
         void *oodle = dlopen("./liblinoodle.so", RTLD_LAZY);
         OodLZ_DecompressFunc *OodLZ_Decompress = (OodLZ_DecompressFunc*)dlsym(oodle, "OodleLZ_Decompress");
 
-        if (OodLZ_Decompress(comp_data, size_z, dec_data, size, 0, 0, 0, NULL, 0, NULL, NULL, NULL, 0, 0) != size) {
+        if (OodLZ_Decompress(comp_data, (int)size_z, dec_data, (int)size, 0, 0, 0, NULL, 0, NULL, NULL, NULL, 0, 0) != size) {
             fprintf(stderr, "ERROR: Failed to decompress meta.resources - bad file?\n");
             return 1;
         }
@@ -277,8 +272,8 @@ int main(int argc, char **argv)
     fclose(meta);
 
     // Check program arguments & generate map if needed
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "--getoffsets"))
+    if (argc > 1) {
+        if (!strcmp(argv[1], "--getoffsets"))
             return generate_map(dec_data, size) ? 0 : 1;
 
         printf("Usage:\n");
@@ -291,7 +286,7 @@ int main(int argc, char **argv)
     FILE *hash_offset_map = fopen("idRehash.map", "rb");
 
     if (!hash_offset_map) {
-        fprintf(stderr, "ERROR: Failed to open idRehash.map for reading!\n");
+        fprintf(stderr, "ERROR: Failed to open idRehash.map for reading.\n");
         fprintf(stderr, "Make sure to generate the hash offset map file first using the --getoffsets option.\n");
         return 1;
     }
@@ -317,7 +312,7 @@ int main(int argc, char **argv)
         size_t offset = strtoul(hash_str, &end, 10);
 
         if (end == hash_str || errno == ERANGE) {
-            fprintf(stderr, "ERROR: Failed to read hash from idRehash.map!\n");
+            fprintf(stderr, "ERROR: Failed to read hash from idRehash.map.\n");
             fprintf(stderr, "Regenerate the hash offset map file by using the --getoffsets option.\n");
             return 1;
         }
@@ -342,7 +337,7 @@ int main(int argc, char **argv)
             if (offset > 0) {
                 uint64_t old_hash = 0;
 
-                for (int i = 7; i >= 0; i--) {
+                for (int j = 7; j >= 0; j--) {
                     old_hash <<= 8;
                     old_hash |= (uint64_t)dec_data[offset + i];
                 }
@@ -350,11 +345,11 @@ int main(int argc, char **argv)
                 if (old_hash != hash) {
                     unsigned char* phash = (unsigned char*)&hash;
 
-                    for (int i = 7; i >= 0; i--)
+                    for (int j = 7; j >= 0; j--)
                         dec_data[offset + i] = phash[i];
 
                     fixed_hashes++;
-                    printf("  ^ Updated from %lx\n\n", old_hash);
+                    printf("  ^ Updated from %llx\n\n", old_hash);
                 }
             }
         }
@@ -371,14 +366,14 @@ int main(int argc, char **argv)
     meta = fopen("meta.resources", "rb+");
 
     if (!meta) {
-        fprintf(stderr, "ERROR: Failed to open meta.resources for writing!\n");
+        fprintf(stderr, "ERROR: Failed to open meta.resources for writing.\n");
         return 1;
     }
 
-    fseek(meta, 0x38 + info_offset + 0x8, SEEK_SET);
+    fseek(meta, (long)(0x38 + info_offset + 0x8), SEEK_SET);
 
     if (fwrite(&size, 1, 4, meta) != 4) {
-        fprintf(stderr, "ERROR: Failed to write to meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to write to meta.resources.\n");
         return 1;
     }
 
@@ -386,19 +381,18 @@ int main(int argc, char **argv)
     fseek(meta, 0x2C, SEEK_CUR);
 
     if (fwrite(&zero, 1, 1, meta) != 1) {
-        fprintf(stderr, "ERROR: Failed to write to meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to write to meta.resources.\n");
         return 1;
     }
 
-    fseek(meta, file_offset, SEEK_SET);
+    fseek(meta, (long)file_offset, SEEK_SET);
 
     if (fwrite(dec_data, 1, size, meta) != size) {
-        fprintf(stderr, "ERROR: Failed to write to meta.resources!\n");
+        fprintf(stderr, "ERROR: Failed to write to meta.resources.\n");
         return 1;
     }
 
     fclose(meta);
-
     free(dec_data);
 
     printf("\nDone, %d hashes changed.\n", fixed_hashes);
