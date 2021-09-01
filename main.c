@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 
     // Check program arguments & generate map if needed
     if (argc > 1) {
-        if (!strcmp(argv[1], "--getoffsets"))
+        if (strcmp(argv[1], "--getoffsets") == 0)
             return generate_map(dec_data, size) ? 0 : 1;
 
         printf("Usage:\n");
