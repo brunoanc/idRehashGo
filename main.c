@@ -82,12 +82,11 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
 // Gets all the resource file paths
 GArray *get_resource_paths(char *filepath)
 {
-    char *filepath_array[1];
+    char *filepath_array[2] = { filepath, NULL };
     GArray *resource_files;
     FTS *ftsp;
     FTSENT *p, *chp;
 
-    filepath_array[0] = filepath;
     ftsp = fts_open(filepath_array, FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR, NULL);
     resource_files = g_array_sized_new(false, false, sizeof(char*), 100);
 
