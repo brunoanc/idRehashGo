@@ -338,14 +338,14 @@ int main(int argc, char **argv)
 
                 for (int j = 7; j >= 0; j--) {
                     old_hash <<= 8;
-                    old_hash |= (uint64_t)dec_data[offset + i];
+                    old_hash |= (uint64_t)dec_data[offset + j];
                 }
 
                 if (old_hash != hash) {
                     unsigned char* phash = (unsigned char*)&hash;
 
                     for (int j = 7; j >= 0; j--)
-                        dec_data[offset + i] = phash[i];
+                        dec_data[offset + j] = phash[j];
 
                     fixed_hashes++;
                     printf("  ^ Updated from %lx\n\n", old_hash);
