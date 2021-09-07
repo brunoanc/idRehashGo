@@ -31,7 +31,7 @@
 // Oodle decompression func
 typedef int OodLZ_DecompressFunc(uint8_t *src_buf, int src_len, uint8_t *dst, size_t dst_size,
     int fuzz, int crc, int verbose,
-    uint8_t *dst_base, size_t e, void *cb, void *cb_ctx, void *scratch, size_t scratch_size, int threadPhase);
+    uint8_t *dst_base, size_t e, void *cb, void *cb_ctx, void *scratch, size_t scratch_size, int thread_phase);
 
 struct resource_map_entry {
     char *resource_path;
