@@ -25,8 +25,9 @@
 #include <fts.h>
 #include <dlfcn.h>
 #include <glib.h>
-
 #include "farmhash-c/farmhash.h"
+
+#define SAFE_SPACE 64
 
 // ooz decompression func
 typedef int Kraken_Decompress(const uint8_t *src, size_t src_len, uint8_t *dst, size_t dst_len);
@@ -235,7 +236,7 @@ int main(int argc, char **argv)
         return 1;
     }
     
-    unsigned char *dec_data = malloc(size);
+    unsigned char *dec_data = malloc(size + SAFE_SPACE);
 
     if (size == size_z) {
         fseek(meta, (long)file_offset, SEEK_SET);
