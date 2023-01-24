@@ -28,10 +28,8 @@
 
 #include "farmhash-c/farmhash.h"
 
-// Oodle decompression func
-typedef int OodLZ_DecompressFunc(uint8_t *src_buf, int src_len, uint8_t *dst, size_t dst_size,
-    int fuzz, int crc, int verbose,
-    uint8_t *dst_base, size_t e, void *cb, void *cb_ctx, void *scratch, size_t scratch_size, int thread_phase);
+// ooz decompression func
+typedef int Kraken_Decompress(const uint8_t *src, size_t src_len, uint8_t *dst, size_t dst_len);
 
 struct resource_map_entry {
     char *resource_path;
@@ -257,10 +255,10 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        void *oodle = dlopen("./liblinoodle.so", RTLD_LAZY);
-        OodLZ_DecompressFunc *OodLZ_Decompress = (OodLZ_DecompressFunc*)dlsym(oodle, "OodleLZ_Decompress");
+        void *ooz = dlopen("./libooz.so", RTLD_LAZY);
+        Kraken_Decompress *kraken_decompress = dlsym(ooz, "Kraken_Decompress");
 
-        if (OodLZ_Decompress(comp_data, (int)size_z, dec_data, (int)size, 0, 0, 0, NULL, 0, NULL, NULL, NULL, 0, 0) != size) {
+        if (kraken_decompress(comp_data, size_z, dec_data, size) != size) {
             fprintf(stderr, "ERROR: Failed to decompress meta.resources - bad file?\n");
             return 1;
         }
