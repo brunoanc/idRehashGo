@@ -195,7 +195,7 @@ bool generate_map(unsigned char *dec_data, const size_t size)
 
 int main(int argc, char **argv)
 {   
-    printf("idRehashLinux v1.2.5 by PowerBall253 :)\n\n");
+    printf("idRehashLinux v1.3.0 by PowerBall253 :)\n\n");
 
     // Read and decompress data from meta.resources
     FILE *meta = fopen("meta.resources", "rb");
