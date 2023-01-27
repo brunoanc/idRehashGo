@@ -299,8 +299,16 @@ int main(int argc, char **argv)
             continue;
 
         *delim_pos = '\0';
-
         char *path = buffer;
+        char *x = path;
+
+        while (*x != '\0') {
+            if (*x == '\\')
+                *x = '/';
+
+            x++;
+        }
+
         char *hash_str = buffer + strlen(path) + 1;
         char *end;
 
