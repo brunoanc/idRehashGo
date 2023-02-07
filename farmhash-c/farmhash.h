@@ -43,6 +43,10 @@
 #ifndef FARMHASH_H
 #define FARMHASH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -160,5 +164,10 @@ static inline uint64_t farmhash_fingerprint_uint64_t(uint64_t x) {
   b *= k_mul;
   return b;
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif  // FARMHASH_H

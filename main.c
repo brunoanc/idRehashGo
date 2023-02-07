@@ -22,11 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <fts.h>
 #include <dlfcn.h>
 #include "cvector/cvector.h"
 #include "cvector/cvector_utils.h"
 #include "farmhash-c/farmhash.h"
+#include "fts/fts.h"
 #include "ooz/ooz.h"
 
 struct resource_map_entry {

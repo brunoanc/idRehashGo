@@ -7,8 +7,9 @@ file(GLOB SOURCES
         ./main.c
         ./cvector/cvector.h
         ./cvector/cvector_utils.h
-        ./farmhash-c/farmhash.c
         ./farmhash-c/farmhash.h
+        ./fts/fts.c
+        ./fts/fts.h
         ./ooz/ooz.h
         )
 
@@ -22,4 +23,4 @@ set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 add_executable(idRehash ${SOURCES})
 
 set_target_properties(idRehash PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(idRehash ${CMAKE_SOURCE_DIR}/ooz/libooz.a)
+target_link_libraries(idRehash ${CMAKE_SOURCE_DIR}/farmhash-c/farmhash.a ${CMAKE_SOURCE_DIR}/ooz/libooz.a)
