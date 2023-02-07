@@ -27,11 +27,7 @@
 #include "cvector/cvector.h"
 #include "cvector/cvector_utils.h"
 #include "farmhash-c/farmhash.h"
-
-#define SAFE_SPACE 64
-
-// ooz decompression func
-typedef int Kraken_Decompress(const uint8_t *src, size_t src_len, uint8_t *dst, size_t dst_len);
+#include "ooz/ooz.h"
 
 struct resource_map_entry {
     char *resource_path;
@@ -258,10 +254,7 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        void *ooz = dlopen("./libooz.so", RTLD_LAZY);
-        Kraken_Decompress *kraken_decompress = dlsym(ooz, "Kraken_Decompress");
-
-        if (kraken_decompress(comp_data, size_z, dec_data, size) != size) {
+        if (Kraken_Decompress(comp_data, size_z, dec_data, size) != size) {
             fprintf(stderr, "ERROR: Failed to decompress meta.resources - bad file?\n");
             return 1;
         }

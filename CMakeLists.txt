@@ -9,9 +9,17 @@ file(GLOB SOURCES
         ./cvector/cvector_utils.h
         ./farmhash-c/farmhash.c
         ./farmhash-c/farmhash.h
+        ./ooz/ooz.h
         )
 
-set (CMAKE_C_FLAGS "-O2 -Wall -Wno-maybe-uninitialized -Werror")
+if(DEFINED ENV{IDREHASHLINUX_STATIC})
+        set (CMAKE_C_FLAGS "-O2 -static -s -Wall -Wno-maybe-uninitialized -Werror")
+else()
+        set (CMAKE_C_FLAGS "-O2 -s -Wall -Wno-maybe-uninitialized -Werror")
+endif()
+
+set (CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 add_executable(idRehash ${SOURCES})
 
-target_link_libraries(idRehash ${CMAKE_DL_LIBS})
+set_target_properties(idRehash PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(idRehash ${CMAKE_SOURCE_DIR}/ooz/libooz.a)
