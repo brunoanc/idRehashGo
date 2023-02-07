@@ -11,8 +11,6 @@ file(GLOB SOURCES
         ./farmhash-c/farmhash.h
         )
 
-find_package(PkgConfig REQUIRED)
-
 set (CMAKE_C_FLAGS "-O2 -DNDEBUG")
 add_executable(idRehash ${SOURCES})
 
