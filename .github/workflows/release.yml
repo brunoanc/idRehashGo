@@ -37,11 +37,22 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Setup Alpine
+      uses: jirutka/setup-alpine@v1
+      with:
+        branch: v3.17
+
+    - name: Install dependencies
+      run: apk add build-base cmake
+      shell: alpine.sh --root {0}
+
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+      shell: alpine.sh {0}
 
     - name: Build
       run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+      shell: alpine.sh {0}
 
     - name: Rename
       run: mv ${{ github.workspace }}/build/idRehash ${{ github.workspace }}/build/idRehash-static
