@@ -24,7 +24,8 @@
 #include <errno.h>
 #include <fts.h>
 #include <dlfcn.h>
-#include <glib.h>
+#include "cvector/cvector.h"
+#include "cvector/cvector_utils.h"
 #include "farmhash-c/farmhash.h"
 
 #define SAFE_SPACE 64
@@ -79,15 +80,15 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
 }
 
 // Gets all the resource file paths
-GArray *get_resource_paths(char *filepath)
+cvector_vector_type(char*) get_resource_paths(char *filepath)
 {
     char *filepath_array[2] = { filepath, NULL };
-    GArray *resource_files;
+    cvector_vector_type(char*) resource_files = NULL;
     FTS *ftsp;
     FTSENT *p, *chp;
 
+    cvector_reserve(resource_files, 100);
     ftsp = fts_open(filepath_array, FTS_COMFOLLOW | FTS_LOGICAL | FTS_NOCHDIR, NULL);
-    resource_files = g_array_sized_new(false, false, sizeof(char*), 100);
 
     if (!ftsp) {
         fprintf(stderr, "ERROR: Failed to open %s directory.\n", filepath);
@@ -117,7 +118,7 @@ GArray *get_resource_paths(char *filepath)
 
         if (strcmp(extension, ".resources") == 0 && strcmp(filename, "meta.resources") != 0) {
             char *resource_path = strdup(p->fts_path);
-            g_array_append_val(resource_files, resource_path);
+            cvector_push_back(resource_files, resource_path);
         }
     }
 
@@ -173,21 +174,22 @@ bool generate_map(unsigned char *dec_data, const size_t size)
         return false;
     }
 
-    GArray *resources_path_array = get_resource_paths(".");
+    cvector_vector_type(char*) resources_path_array = get_resource_paths(".");
+    char **resource_path;
 
-    for (size_t i = 0; i < resources_path_array->len; i++) {
-        char *resource_path = g_array_index(resources_path_array, char*, i);
-        size_t hash_offset = get_resource_hash_offset(resource_path, dec_data, size);
+    cvector_for_each_in(resource_path, resources_path_array) {
+        size_t hash_offset = get_resource_hash_offset(*resource_path, dec_data, size);
 
         if (hash_offset == 0) {
-            fprintf(stderr, "ERROR: Failed to get hash for %s.\n", resource_path);
+            fprintf(stderr, "ERROR: Failed to get hash for %s.\n", *resource_path);
             return false;
         }
-        
-        fprintf(hash_offset_map, "%s;%lu\n", resource_path, hash_offset);
+
+        fprintf(hash_offset_map, "%s;%lu\n", *resource_path, hash_offset);
+        free(*resource_path);
     }
 
-    g_array_free(resources_path_array, true);
+    cvector_free(resources_path_array);
     fclose(hash_offset_map);
 
     printf("\nidRehash.map has been successfully generated.\n");
@@ -289,7 +291,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    GArray *resource_offsets = g_array_sized_new(false, false, sizeof(struct resource_map_entry), 100);
+    cvector_vector_type(struct resource_map_entry) resource_offsets;
+    cvector_reserve(resource_offsets, 100);
+
     char buffer[1024];
 
     while(fgets(buffer, sizeof(buffer), hash_offset_map) != NULL) {
@@ -324,22 +328,20 @@ int main(int argc, char **argv)
         }
 
         struct resource_map_entry entry = { strdup(path), offset };
-
-        g_array_append_val(resource_offsets, entry);
+        cvector_push_back(resource_offsets, entry);
     }
 
     fclose(hash_offset_map);
 
     // Hash resource headers and change the hash in the decompressed meta.resources data
+    struct resource_map_entry *resource;
     int fixed_hashes = 0;
 
-    for (size_t i = 0; i < resource_offsets->len; i++) {
-        struct resource_map_entry resource = g_array_index(resource_offsets, struct resource_map_entry, i);
-
-        size_t offset = resource.offset;
+    cvector_for_each_in(resource, resource_offsets) {
+        size_t offset = resource->offset;
         uint64_t hash = 0;
 
-        if (hash_resource_headers(resource.resource_path, &hash)) {
+        if (hash_resource_headers(resource->resource_path, &hash)) {
             if (offset > 0) {
                 uint64_t old_hash = 0;
 
@@ -359,9 +361,11 @@ int main(int argc, char **argv)
                 }
             }
         }
+
+        free(resource->resource_path);
     }
 
-    g_array_free(resource_offsets, true);
+    cvector_free(resource_offsets);
 
     if (fixed_hashes == 0) {
         printf("\nDone, 0 hashes changed.\n");

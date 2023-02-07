@@ -5,15 +5,15 @@ set(CMAKE_C_STANDARD 99)
 
 file(GLOB SOURCES
         ./main.c
+        ./cvector/cvector.h
+        ./cvector/cvector_utils.h
         ./farmhash-c/farmhash.c
         ./farmhash-c/farmhash.h
         )
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
-include_directories(${GLIB_INCLUDE_DIRS})
 
 set (CMAKE_C_FLAGS "-O2 -DNDEBUG")
 add_executable(idRehash ${SOURCES})
 
-target_link_libraries(idRehash ${GLIB_LDFLAGS} ${CMAKE_DL_LIBS})
+target_link_libraries(idRehash ${CMAKE_DL_LIBS})
