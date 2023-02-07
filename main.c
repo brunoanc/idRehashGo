@@ -72,7 +72,7 @@ bool hash_resource_headers(const char *path, uint64_t *hash)
 
     fclose(f);
 
-    *hash = farmhash64(hashed_data, headers_size);
+    *hash = farmhash_fingerprint64(hashed_data, headers_size);
     printf("%s: %lx\n", path, *hash);
 
     free(hashed_data);
@@ -142,7 +142,7 @@ size_t get_resource_hash_offset(const char *path, const unsigned char *dec_conta
     size_t hash_offset = 0;
     int current_hash_byte = 0;
 
-    for (size_t i = dec_size - 1; i >= 0; i--) {
+    for (ssize_t i = dec_size - 1; i >= 0; i--) {
         if (dec_container_mask_data[i] != hash_bytes[7 - current_hash_byte]) {
             current_hash_byte = 0;
             continue;

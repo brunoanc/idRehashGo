@@ -11,7 +11,7 @@ file(GLOB SOURCES
         ./farmhash-c/farmhash.h
         )
 
-set (CMAKE_C_FLAGS "-O2 -DNDEBUG")
+set (CMAKE_C_FLAGS "-O2 -Wall -Wno-maybe-uninitialized -Werror")
 add_executable(idRehash ${SOURCES})
 
 target_link_libraries(idRehash ${CMAKE_DL_LIBS})
