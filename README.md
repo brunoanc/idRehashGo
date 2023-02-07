@@ -1,5 +1,5 @@
 # idRehashLinux
-![Build Status](https://github.com/PowerBall253/idRehashLinux/actions/workflows/cmake.yml/badge.svg)
+![Build Status](https://github.com/PowerBall253/idRehashLinux/actions/workflows/test.yml/badge.svg)
 
 DOOM Eternal .resources rehasher, rewritten in C for Linux.
 

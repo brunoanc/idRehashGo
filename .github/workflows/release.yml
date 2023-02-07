@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+    - name: Upload binary
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file_glob: true
+        file: "**/idRehash"
+        tag: ${{ github.ref }}
+
+  release-static:
+    runs-on: ubuntu-latest
+    env:
+      IDREHASHLINUX_STATIC: '1'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+    - name: Build
+      run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+    - name: Rename
+      run: mv ${{ github.workspace }}/build/idRehash ${{ github.workspace }}/build/idRehash-static
+
+    - name: Upload static binary
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file_glob: true
+        file: "**/idRehash-static"
+        tag: ${{ github.ref }}
