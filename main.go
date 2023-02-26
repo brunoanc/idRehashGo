@@ -31,7 +31,8 @@ import (
 	"strings"
 )
 
-// #cgo LDFLAGS: -L./ooz -looz -lstdc++ -static
+// #cgo linux LDFLAGS: -L./ooz -looz_linux -lstdc++ -static
+// #cgo windows LDFLAGS: -L./ooz -looz_windows -lstdc++ -static
 // #include "ooz/ooz.h"
 import "C"
 
@@ -311,7 +312,7 @@ func getDecompressedData(metaPath string) ([]byte, int64, int64) {
 		decData := make([]byte, size + 64)
 
 		// Decompress using Kraken
-		result := (uint64)(C.Kraken_Decompress((*C.uchar)(&data[0]), (C.ulong)(sizeZ), (*C.uchar)(&decData[0]), (C.ulong)(size)))
+		result := (uint64)(C.Kraken_Decompress((*C.uchar)(&data[0]), (C.size_t)(sizeZ), (*C.uchar)(&decData[0]), (C.size_t)(size)))
 		if result != size {
 			fmt.Fprintln(os.Stderr, "ERROR: Failed to decompress meta.resources - bad file?")
 			return nil, 0, 0
