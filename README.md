@@ -15,7 +15,7 @@ After that, you can rehash the resource offsets on meta.resources by running:
 ```
 
 ## Compiling
-The project requires the [go toolchain](https://go.dev/dl/) to be compiled.
+The project requires the [go toolchain](https://go.dev/dl/) to be compiled. Additionally, a GCC toolchain such as MinGW is required on Windows.
 
 To compile, run:
 
