@@ -5,34 +5,9 @@ on:
     tags:
       - "v*"
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
-  release:
+  release-ubuntu:
     runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Configure CMake
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-
-    - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
-
-    - name: Upload binary
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file_glob: true
-        file: "**/idRehash"
-        tag: ${{ github.ref }}
-
-  release-static:
-    runs-on: ubuntu-latest
-    env:
-      IDREHASHLINUX_STATIC: '1'
 
     steps:
     - uses: actions/checkout@v3
@@ -42,25 +17,65 @@ jobs:
       with:
         branch: v3.17
 
-    - name: Install dependencies
-      run: apk add build-base cmake
+    - name: Install build dependencies
+      run: apk add build-base go upx
       shell: alpine.sh --root {0}
 
-    - name: Configure CMake
-      run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+    - name: Get code dependencies
+      run: go get .
       shell: alpine.sh {0}
+
+    - name: Get tag
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
     - name: Build
-      run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+      run: go build -o idRehash -ldflags="-s -w -X 'main.Version=$RELEASE_VERSION'" .
       shell: alpine.sh {0}
 
-    - name: Rename
-      run: mv ${{ github.workspace }}/build/idRehash ${{ github.workspace }}/build/idRehash-static
+    - name: Pack with UPX
+      run: upx --best idRehash
+      shell: alpine.sh {0}
 
-    - name: Upload static binary
+    - name: Upload binary
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file_glob: true
-        file: "**/idRehash-static"
+        file: "**/idRehash"
+        tag: ${{ github.ref }}
+
+  release-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install UPX
+      run: choco install upx
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.20'
+
+    - name: Get dependencies
+      run: go get .
+
+    - name: Get tag
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Build
+      run: go build -o idRehash.exe -ldflags="-s -w -X 'main.Version=$RELEASE_VERSION'" .
+      shell: bash
+
+    - name: Pack with UPX
+      run: upx --best idRehash.exe
+
+    - name: Upload binary
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file_glob: true
+        file: "**/idRehash.exe"
         tag: ${{ github.ref }}
