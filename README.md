@@ -31,11 +31,5 @@ go build -o idRehash -ldflags="-s -w -X 'main.Version=vX.Y.Z'" .
 
 (replace vX.Y.Z with the version number you prefer).
 
-Additionally, you may use [UPX](https://upx.github.io/) to compress the binary:
-
-```
-upx --best idRehash
-```
-
 ## Credits
 * proteh and emoose: For creating the original idRehash.
